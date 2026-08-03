@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEATHCREW 18 | Official Esports Organization</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    <!-- Three.js for 3D Background Particles -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Chart.js for Statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Canvas Confetti for Victories -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            black: '#08080c',
+                            dark: '#0f1017',
+                            card: 'rgba(18, 20, 32, 0.75)',
+                            red: '#ff003c',
+                            redGlow: '#ff003c88',
+                            blue: '#00f0ff',
+                            blueGlow: '#00f0ff88',
+                            yellow: '#fcee0a',
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            cursor: default;
+        }
+        button, a, input, select, textarea, .interactive {
+            cursor: pointer !important;
+        }
+        body {
+            background-color: #08080c;
+            color: #e2e8f0;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Cyberpunk Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08080c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff003c;
+            border-radius: 4px;
+            box-shadow: 0 0 10px #ff003c;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+
+        /* Neon Glow Effects */
+        .glow-red {
+            text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c, 0 0 30px #ff003c;
+        }
+        .glow-blue {
+            text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 30px #00f0ff;
+        }
+        .box-glow-red {
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.4), inset 0 0 15px rgba(255, 0, 60, 0.15);
+            border: 1px solid rgba(255, 0, 60, 0.5);
+        }
+        .box-glow-blue {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4), inset 0 0 15px rgba(0, 240, 255, 0.15);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+        }
+        .box-glow-yellow {
+            box-shadow: 0 0 15px rgba(252, 238, 10, 0.4), inset 0 0 15px rgba(252, 238, 10, 0.15);
+            border: 1px solid rgba(252, 238, 10, 0.5);
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(15, 16, 23, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Cyber Clip Paths */
+        .cyber-corner {
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+        .cyber-btn {
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.3s ease;
+        }
+        .cyber-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+        }
+
+        /* Scanline Overlay */
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 40;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Custom Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+        .animate-float {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* Typewriter Cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="selection:bg-cyber-red selection:text-white relative min-h-screen">
+
+    <!-- 3D Particle Background Canvas -->
+    <canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full z-0 pointer-events-none opacity-60"></canvas>
+    
+    <!-- Cyber CRT Scanline Effect -->
+    <div class="scanline"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loader" class="fixed inset-0 z-50 bg-cyber-black flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative flex flex-col items-center">
+            <!-- Animated Cyber Logo Box -->
+            <div class="w-28 h-28 border-2 border-cyber-red border-t-cyber-blue rounded-full animate-spin flex items-center justify-center mb-6 box-glow-red">
+                <i class="fa-solid fa-skull-crossbones text-4xl text-cyber-red animate-pulse"></i>
+            </div>
+            <h1 class="font-orbitron text-3xl font-black tracking-widest text-white glow-red">DEATHCREW <span class="text-cyber-blue">18</span></h1>
+            <p class="font-rajdhani text-sm tracking-widest text-gray-400 mt-2 uppercase">Initialising Esports Systems...</p>
+            <div class="w-64 h-1.5 bg-gray-800 rounded-full mt-6 overflow-hidden border border-cyber-red/30">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-cyber-red via-cyber-blue to-cyber-yellow w-0 transition-all duration-300"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-40 glass-panel border-b border-cyber-red/20 px-4 md:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#home" class="flex items-center space-x-3 group" onclick="playAudio('click')">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyber-red to-black rounded-lg flex items-center justify-center border border-cyber-red box-glow-red group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-crosshairs text-xl text-white"></i>
+                </div>
+                <div>
+                    <span class="font-orbitron font-extrabold text-xl tracking-wider text-white group-hover:text-cyber-blue transition-colors">DEATHCREW <span class="text-cyber-red">18</span></span>
+                    <span class="block text-[10px] text-cyber-blue uppercase tracking-widest font-mono">Owner: <span id="nav-owner-name">Priyanshu</span></span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <div class="hidden lg:flex items-center space-x-6 text-sm font-semibold tracking-wider font-orbitron uppercase">
+                <a href="#home" class="hover:text-cyber-red transition-colors py-1 border-b-2 border-transparent hover:border-cyber-red" onclick="playAudio('click')">Home</a>
+                <a href="#owner" class="hover:text-cyber-blue transition-colors py-1 border-b-2 border-transparent hover:border-cyber-blue" onclick="playAudio('click')">Owner</a>
+                <a href="#roster" class="hover:text-cyber-red transition-colors py-1 border-b-2 border-transparent hover:border-cyber-red" onclick="playAudio('click')">Roster</a>
+                <a href="#tables" class="hover:text-cyber-blue transition-colors py-1 border-b-2 border-transparent hover:border-cyber-blue" onclick="playAudio('click')">Point Tables</a>
+                <a href="#stats" class="hover:text-cyber-red transition-colors py-1 border-b-2 border-transparent hover:border-cyber-red" onclick="playAudio('click')">Stats</a>
+                <a href="#gallery" class="hover:text-cyber-blue transition-colors py-1 border-b-2 border-transparent hover:border-cyber-blue" onclick="playAudio('click')">Gallery</a>
+                <a href="#news" class="hover:text-cyber-red transition-colors py-1 border-b-2 border-transparent hover:border-cyber-red" onclick="playAudio('click')">News</a>
+            </div>
+
+            <!-- Right Controls: Share Button, SFX, Live Clock, Admin Login -->
+            <div class="flex items-center space-x-3">
+                <!-- Live Digital Clock -->
+                <div class="hidden sm:flex items-center bg-black/60 px-3 py-1.5 rounded border border-cyber-blue/30 font-mono text-xs text-cyber-blue space-x-2">
+                    <i class="fa-regular fa-clock text-cyber-red animate-pulse"></i>
+                    <span id="live-clock">00:00:00 PM</span>
+                </div>
+
+                <!-- Direct Website Share Button -->
+                <button onclick="shareDirectLink()" title="Share / Copy Direct Website Link" class="w-9 h-9 glass-panel rounded border border-cyber-yellow/60 text-cyber-yellow hover:bg-cyber-yellow/20 flex items-center justify-center transition box-glow-yellow">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+
+                <!-- Sound Effects Switcher -->
+                <button id="sound-btn" onclick="toggleAudio()" title="Toggle SFX" class="w-9 h-9 glass-panel rounded border border-cyber-blue/40 text-cyber-blue hover:bg-cyber-blue/20 flex items-center justify-center transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+
+                <!-- Admin Status / Login Toggle -->
+                <button id="admin-login-btn" onclick="openAdminModal()" class="cyber-btn bg-gradient-to-r from-cyber-red to-red-800 text-white font-orbitron font-bold text-xs px-3.5 py-2 uppercase flex items-center space-x-1.5 box-glow-red">
+                    <i id="admin-icon" class="fa-solid fa-lock"></i>
+                    <span id="admin-btn-text">Admin</span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden w-9 h-9 glass-panel rounded text-white flex items-center justify-center">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu Dropdown -->
+        <div id="mobile-menu" class="hidden lg:hidden mt-3 pt-3 border-t border-gray-800 flex flex-col space-y-3 font-orbitron text-sm uppercase px-2 pb-2">
+            <a href="#home" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-red py-1">Home</a>
+            <a href="#owner" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-blue py-1">Owner Profile</a>
+            <a href="#roster" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-red py-1">Team Roster</a>
+            <a href="#tables" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-blue py-1">Point Tables</a>
+            <a href="#stats" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-red py-1">Statistics</a>
+            <a href="#gallery" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-blue py-1">Gallery & Highlights</a>
+            <a href="#news" onclick="toggleMobileMenu(); playAudio('click')" class="hover:text-cyber-red py-1">Latest News</a>
+        </div>
+    </nav>
+
+    <!-- Admin Management Control Bar (Visible when logged in) -->
+    <div id="admin-control-bar" class="hidden bg-red-950/90 border-b border-cyber-red py-2 px-4 md:px-8 text-xs font-mono text-white flex flex-wrap items-center justify-between gap-2 relative z-30">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-shield-halved text-cyber-yellow animate-pulse"></i>
+            <span class="font-bold uppercase text-cyber-yellow">Admin Control Panel Active</span>
+            <span class="text-gray-400 hidden sm:inline">| Authorized Owner Mode</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="openOwnerModal()" class="bg-cyber-blue/20 hover:bg-cyber-blue/40 text-cyber-blue font-bold px-3 py-1.5 rounded border border-cyber-blue transition flex items-center space-x-1.5 box-glow-blue">
+                <i class="fa-solid fa-user-pen"></i>
+                <span>Edit Owner Info</span>
+            </button>
+            <button onclick="openResetModal()" class="bg-cyber-red hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded border border-red-400 transition flex items-center space-x-1.5 box-glow-red">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Reset All Site Data</span>
+            </button>
+            <button onclick="logoutAdmin()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-3 py-1.5 rounded border border-gray-600 transition">
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-8 space-y-20">
+
+        <!-- HERO SECTION -->
+        <section id="home" class="relative pt-6 pb-12 flex flex-col lg:flex-row items-center justify-between gap-10">
+            <!-- Left Hero Details -->
+            <div class="lg:w-7/12 space-y-6">
+                <!-- Org Badge -->
+                <div class="inline-flex items-center space-x-2 bg-cyber-red/10 border border-cyber-red px-3.5 py-1.5 rounded-full text-xs font-mono text-cyber-red uppercase box-glow-red">
+                    <span class="w-2 h-2 rounded-full bg-cyber-red animate-ping"></span>
+                    <span>Official Free Fire Esports Organization</span>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="font-orbitron text-4xl sm:text-6xl font-black uppercase tracking-tight leading-none text-white">
+                    FEAR THE <br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-red via-red-500 to-cyber-yellow glow-red">DEATHCREW 18</span>
+                </h1>
+
+                <!-- Dynamic Typewriter Subtitle -->
+                <p class="font-mono text-base sm:text-lg text-cyber-blue font-semibold min-h-[28px] tracking-wide">
+                    <span id="typewriter-text"></span><span class="typing-cursor"></span>
+                </p>
+
+                <p class="text-gray-300 font-rajdhani text-base sm:text-lg max-w-2xl leading-relaxed">
+                    Founded & Powered by <strong id="hero-owner-name" class="text-cyber-red uppercase">Priyanshu</strong>. Dominating scrims, tournaments, and national esports arenas with tactical precision and unyielding firepower.
+                </p>
+
+                <!-- Animated Stat Counters -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div class="glass-panel p-3 rounded-lg border-l-4 border-cyber-red text-center">
+                        <div id="counter-booyah" class="font-orbitron font-extrabold text-2xl text-white">0</div>
+                        <div class="text-[11px] font-mono uppercase text-gray-400">Total Booyahs</div>
+                    </div>
+                    <div class="glass-panel p-3 rounded-lg border-l-4 border-cyber-blue text-center">
+                        <div id="counter-kills" class="font-orbitron font-extrabold text-2xl text-cyber-blue">0</div>
+                        <div class="text-[11px] font-mono uppercase text-gray-400">Kill Count</div>
+                    </div>
+                    <div class="glass-panel p-3 rounded-lg border-l-4 border-cyber-yellow text-center">
+                        <div id="counter-winrate" class="font-orbitron font-extrabold text-2xl text-cyber-yellow">0%</div>
+                        <div class="text-[11px] font-mono uppercase text-gray-400">Win Rate</div>
+                    </div>
+                    <div class="glass-panel p-3 rounded-lg border-l-4 border-green-500 text-center">
+                        <div class="font-orbitron font-extrabold text-2xl text-green-400">#1</div>
+                        <div class="text-[11px] font-mono uppercase text-gray-400">Live Team Rank</div>
+                    </div>
+                </div>
+
+                <!-- Call to Action Buttons -->
+                <div class="flex flex-wrap items-center gap-4 pt-4">
+                    <button onclick="openRecruitModal()" class="cyber-btn bg-cyber-red hover:bg-red-700 text-white font-orbitron font-bold text-sm px-7 py-3.5 uppercase tracking-wider box-glow-red flex items-center space-x-2">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Join The Crew</span>
+                    </button>
+                    <a href="#roster" onclick="playAudio('click')" class="cyber-btn glass-panel border border-cyber-blue text-cyber-blue hover:bg-cyber-blue/10 font-orbitron font-bold text-sm px-6 py-3.5 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                        <span>View Roster</span>
+                    </a>
+                </div>
+
+                <!-- Social Links Grid -->
+                <div class="flex items-center space-x-3 pt-2">
+                    <span class="text-xs font-mono uppercase text-gray-400">Connect:</span>
+                    <a href="https://discord.com" target="_blank" rel="noopener noreferrer" title="Discord Link" class="w-9 h-9 glass-panel rounded-full flex items-center justify-center text-cyber-blue hover:bg-cyber-blue/20 transition border border-cyber-blue/30">
+                        <i class="fa-brands fa-discord"></i>
+                    </a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram Link" class="w-9 h-9 glass-panel rounded-full flex items-center justify-center text-cyber-red hover:bg-cyber-red/20 transition border border-cyber-red/30">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" title="YouTube Channel" class="w-9 h-9 glass-panel rounded-full flex items-center justify-center text-red-500 hover:bg-red-500/20 transition border border-red-500/30">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+                    <a id="hero-wa-link" href="https://api.whatsapp.com/send?text=Hello%20Priyanshu!%20Connecting%20from%20DEATHCREW%2018%20Esports." target="_blank" rel="noopener noreferrer" title="WhatsApp Contact Link" class="w-9 h-9 glass-panel rounded-full flex items-center justify-center text-green-400 hover:bg-green-400/20 transition border border-green-400/30">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Hero Card: Upcoming Tournament Countdown -->
+            <div class="lg:w-5/12 w-full">
+                <div class="glass-panel p-6 rounded-2xl border-2 border-cyber-red/40 box-glow-red relative overflow-hidden animate-float">
+                    <div class="absolute -top-12 -right-12 w-36 h-36 bg-cyber-red/20 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-trophy text-cyber-yellow text-xl"></i>
+                            <span class="font-orbitron font-bold text-sm text-white uppercase tracking-wider">Next Grand Final</span>
+                        </div>
+                        <span class="bg-red-950/80 text-cyber-red text-xs font-mono px-2.5 py-1 rounded border border-cyber-red">FF Scrim Championship</span>
+                    </div>
+
+                    <!-- Countdown Display -->
+                    <div class="py-6 text-center">
+                        <p class="text-xs font-mono uppercase text-gray-400 mb-3">Tournament Starts In</p>
+                        <div class="grid grid-cols-4 gap-2 text-center font-orbitron">
+                            <div class="bg-black/80 p-2.5 rounded border border-cyber-blue/30">
+                                <span id="timer-days" class="block font-black text-2xl text-cyber-blue">02</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-mono">Days</span>
+                            </div>
+                            <div class="bg-black/80 p-2.5 rounded border border-cyber-blue/30">
+                                <span id="timer-hours" class="block font-black text-2xl text-cyber-blue">14</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-mono">Hours</span>
+                            </div>
+                            <div class="bg-black/80 p-2.5 rounded border border-cyber-blue/30">
+                                <span id="timer-mins" class="block font-black text-2xl text-cyber-blue">38</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-mono">Mins</span>
+                            </div>
+                            <div class="bg-black/80 p-2.5 rounded border border-cyber-red/40">
+                                <span id="timer-secs" class="block font-black text-2xl text-cyber-red animate-pulse">45</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-mono">Secs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tournament Status Quick Details -->
+                    <div class="space-y-2 text-xs font-mono bg-black/40 p-3 rounded border border-gray-800">
+                        <div class="flex justify-between text-gray-300">
+                            <span>Prize Pool:</span>
+                            <span class="text-cyber-yellow font-bold">₹50,000 INR</span>
+                        </div>
+                        <div class="flex justify-between text-gray-300">
+                            <span>Mode / Map:</span>
+                            <span class="text-white">Squad / Bermuda & Purgatory</span>
+                        </div>
+                        <div class="flex justify-between text-gray-300">
+                            <span>Broadcast:</span>
+                            <span class="text-cyber-blue font-bold">LIVE ON YOUTUBE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OWNER SECTION -->
+        <section id="owner" class="scroll-mt-24 space-y-6">
+            <div class="flex items-center justify-between border-l-4 border-cyber-red pl-4">
+                <div>
+                    <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white uppercase">ORGANIZATION OWNER</h2>
+                    <p class="text-xs font-mono text-cyber-blue tracking-widest uppercase">Leadership & Visionary Founder</p>
+                </div>
+                <!-- Admin Only Edit Owner Info Button -->
+                <button onclick="openOwnerModal()" class="admin-only hidden cyber-btn bg-cyber-red hover:bg-red-700 text-white font-orbitron font-bold text-xs px-4 py-2.5 uppercase tracking-wider box-glow-red flex items-center space-x-1.5">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span>Edit Owner Info</span>
+                </button>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 sm:p-10 border border-cyber-red/30 box-glow-red relative overflow-hidden flex flex-col md:flex-row items-center gap-8">
+                <!-- Glowing Cyber Background Circle -->
+                <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-cyber-red/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Owner Profile Picture / Card -->
+                <div class="relative group flex-shrink-0">
+                    <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border-2 border-cyber-red box-glow-red relative bg-slate-900 flex items-center justify-center">
+                        <img id="owner-avatar-img" src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=600&q=80" alt="Owner" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-cyber-black via-transparent to-transparent"></div>
+                        <div class="absolute bottom-2 left-2 right-2 text-center bg-black/70 backdrop-blur-md py-1 rounded border border-cyber-red/50">
+                            <span id="owner-title-badge" class="font-orbitron font-extrabold text-xs text-cyber-yellow tracking-widest uppercase">FOUNDER & CEO</span>
+                        </div>
+                    </div>
+                    <div class="absolute -top-3 -right-3 bg-cyber-red text-white w-8 h-8 rounded-full flex items-center justify-center font-black text-sm box-glow-red">
+                        <i class="fa-solid fa-crown text-cyber-yellow"></i>
+                    </div>
+                </div>
+
+                <!-- Owner Info -->
+                <div class="space-y-4 text-center md:text-left flex-1">
+                    <div>
+                        <span class="text-xs font-mono text-cyber-blue uppercase tracking-widest">OWNER & LEADER</span>
+                        <h3 id="owner-name-display" class="font-orbitron text-3xl sm:text-4xl font-black text-white glow-red tracking-wider">PRIYANSHU</h3>
+                        <p class="font-rajdhani text-lg text-gray-300 font-semibold">Founder of <span class="text-cyber-red font-bold">DEATHCREW 18 Esports</span></p>
+                    </div>
+
+                    <p id="owner-bio-display" class="text-gray-300 font-rajdhani text-base leading-relaxed max-w-2xl">
+                        "DEATHCREW 18 was built on ruthless discipline, top-tier aiming, and tactical synergy. Our objective is simple: conquer every Free Fire tournament, dominate points tables, and construct an unbreakable legacy in the esports ecosystem."
+                    </p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                        <div class="bg-black/50 p-2.5 rounded border border-gray-800">
+                            <span class="block text-[10px] font-mono text-gray-400 uppercase">IGN UID</span>
+                            <span id="owner-uid-display" class="font-orbitron font-bold text-cyber-blue text-sm">1818181818</span>
+                        </div>
+                        <div class="bg-black/50 p-2.5 rounded border border-gray-800">
+                            <span class="block text-[10px] font-mono text-gray-400 uppercase">Role</span>
+                            <span id="owner-role-display" class="font-orbitron font-bold text-cyber-yellow text-sm">IGL / Strategy</span>
+                        </div>
+                        <div class="bg-black/50 p-2.5 rounded border border-gray-800 col-span-2 sm:col-span-1">
+                            <span class="block text-[10px] font-mono text-gray-400 uppercase">Status</span>
+                            <span id="owner-status-display" class="font-orbitron font-bold text-green-400 text-sm uppercase">ACTIVE OWNER</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                        <button id="owner-copy-btn" onclick="copyUID(ownerData.uid)" class="cyber-btn bg-cyber-blue/10 border border-cyber-blue hover:bg-cyber-blue/20 text-cyber-blue font-orbitron font-bold text-xs px-4 py-2 rounded">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy Owner UID
+                        </button>
+                        <a id="owner-wa-btn" href="#" target="_blank" rel="noopener noreferrer" onclick="playAudio('click')" class="cyber-btn bg-green-500/10 border border-green-500 hover:bg-green-500/20 text-green-400 font-orbitron font-bold text-xs px-4 py-2 rounded flex items-center">
+                            <i class="fa-brands fa-whatsapp mr-1.5 text-sm"></i> Direct WhatsApp Link
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TEAM PLAYERS SECTION -->
+        <section id="roster" class="scroll-mt-24 space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-cyber-blue pl-4">
+                <div>
+                    <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white uppercase">TEAM PLAYERS</h2>
+                    <p class="text-xs font-mono text-cyber-red tracking-widest uppercase">Active Free Fire Roster</p>
+                </div>
+
+                <!-- Admin Action + Search Filters -->
+                <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-sm"></i>
+                        <input type="text" id="player-search" oninput="filterPlayers()" placeholder="Search player name or UID..." class="w-full bg-black/60 text-sm text-white pl-9 pr-3 py-2 rounded border border-gray-800 focus:border-cyber-blue outline-none font-mono">
+                    </div>
+                    <button id="add-player-btn" onclick="openAddPlayerModal()" class="admin-only hidden cyber-btn bg-cyber-blue hover:bg-cyan-600 text-black font-orbitron font-bold text-xs px-4 py-2.5 uppercase tracking-wider box-glow-blue flex items-center space-x-1.5">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Add Player</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Player Cards Grid -->
+            <div id="players-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via JavaScript -->
+            </div>
+        </section>
+
+        <!-- TOURNAMENT POINT TABLE SECTION -->
+        <section id="tables" class="scroll-mt-24 space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-cyber-yellow pl-4">
+                <div>
+                    <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white uppercase">TOURNAMENT POINT TABLES</h2>
+                    <p class="text-xs font-mono text-cyber-yellow tracking-widest uppercase">Scoring Records & Standing Direct Links</p>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button id="add-table-btn" onclick="openAddTableModal()" class="admin-only hidden cyber-btn bg-cyber-yellow text-black font-orbitron font-bold text-xs px-4 py-2.5 uppercase tracking-wider flex items-center space-x-1.5 box-glow-yellow">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                        <span>Upload Point Table</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container Card -->
+            <div class="glass-panel rounded-2xl p-4 sm:p-6 border border-gray-800 overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[650px]">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-xs font-mono uppercase text-cyber-blue bg-black/40">
+                            <th class="p-3">Tournament Name</th>
+                            <th class="p-3">Position</th>
+                            <th class="p-3">Points</th>
+                            <th class="p-3">Uploaded On</th>
+                            <th class="p-3 text-right">Direct File Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="point-tables-body" class="divide-y divide-gray-800/60 font-rajdhani text-sm sm:text-base">
+                        <!-- Injected dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TEAM STATISTICS & MATCH HISTORY SECTION -->
+        <section id="stats" class="scroll-mt-24 space-y-8">
+            <div class="border-l-4 border-cyber-red pl-4">
+                <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white uppercase">TEAM STATISTICS</h2>
+                <p class="text-xs font-mono text-cyber-blue tracking-widest uppercase">Performance Metrics & Live Analytics</p>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Kill Distribution Chart -->
+                <div class="glass-panel p-5 rounded-2xl border border-gray-800">
+                    <h3 class="font-orbitron font-bold text-sm text-white mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-chart-pie text-cyber-red mr-2"></i> Player Kill Share</span>
+                        <span class="text-xs font-mono text-gray-500">Live Season</span>
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="chart-kills"></canvas>
+                    </div>
+                </div>
+
+                <!-- Points Trend Chart -->
+                <div class="glass-panel p-5 rounded-2xl border border-gray-800">
+                    <h3 class="font-orbitron font-bold text-sm text-white mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-chart-line text-cyber-blue mr-2"></i> Tournament Score Progress</span>
+                        <span class="text-xs font-mono text-gray-500">Last 5 Scrims</span>
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="chart-progress"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match History Table -->
+            <div class="space-y-4 pt-4">
+                <h3 class="font-orbitron font-bold text-xl text-white uppercase border-b border-gray-800 pb-2">🎮 Recent Match History</h3>
+                <div class="glass-panel rounded-2xl p-4 border border-gray-800 overflow-x-auto">
+                    <table class="w-full text-left min-w-[550px]">
+                        <thead>
+                            <tr class="text-xs font-mono text-gray-400 border-b border-gray-800 pb-2 uppercase">
+                                <th class="p-2">Date</th>
+                                <th class="p-2">Match / Map</th>
+                                <th class="p-2">Position</th>
+                                <th class="p-2">Kills</th>
+                                <th class="p-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="match-history-body" class="divide-y divide-gray-800/50 text-sm">
+                            <!-- JS Populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- GALLERY & HIGHLIGHTS SECTION -->
+        <section id="gallery" class="scroll-mt-24 space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-cyber-blue pl-4">
+                <div>
+                    <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white uppercase">GALLERY & HIGHLIGHTS</h2>
+                    <p class="text-xs font-mono text-cyber-blue tracking-widest uppercase">Screenshots, Wallpapers & Gameplay Clips</p>
+                </div>
+
+                <button id="add-media-btn" onclick="openAddMediaModal()" class="admin-only hidden cyber-btn bg-cyber-blue text-black font-orbitron font-bold text-xs px-4 py-2.5 uppercase tracking-wider box-glow-blue flex items-center space-x-1.5">
+                    <i class="fa-solid fa-photo-film"></i>
+                    <span>Add Media / Highlight</span>
+                </button>
+            </div>
+
+            <!-- Media Grid -->
+            <div id="media-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- LATEST NEWS SECTION -->
+        <section id="news" class="scroll-mt-24 space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-cyber-red pl-4">
+                <div>
+                    <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white uppercase">LATEST NEWS & ANNOUNCEMENTS</h2>
+                    <p class="text-xs font-mono text-cyber-red tracking-widest uppercase">Organization Updates</p>
+                </div>
+
+                <button id="add-news-btn" onclick="openAddNewsModal()" class="admin-only hidden cyber-btn bg-cyber-red text-white font-orbitron font-bold text-xs px-4 py-2.5 uppercase tracking-wider box-glow-red flex items-center space-x-1.5">
+                    <i class="fa-solid fa-newspaper"></i>
+                    <span>Post News Update</span>
+                </button>
+            </div>
+
+            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SECTION -->
+    <footer class="glass-panel border-t border-cyber-red/30 mt-20 py-10 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left space-y-2">
+                <div class="flex items-center justify-center md:justify-start space-x-2">
+                    <i class="fa-solid fa-skull-crossbones text-cyber-red text-xl"></i>
+                    <span class="font-orbitron font-black text-xl text-white">DEATHCREW 18</span>
+                </div>
+                <p class="text-xs font-mono text-gray-400">Official Website • Owned & Administered by <strong id="footer-owner-name" class="text-cyber-blue uppercase">PRIYANSHU</strong></p>
+                <p class="text-[11px] text-gray-500">&copy; 2026 DEATHCREW 18 Esports. All rights reserved.</p>
+            </div>
+
+            <!-- Visitor Counter & Quick Stats -->
+            <div class="flex items-center space-x-6 text-xs font-mono bg-black/60 px-4 py-2 rounded-lg border border-gray-800">
+                <div>
+                    <span class="text-gray-500 uppercase block text-[10px]">Total Visitors</span>
+                    <span id="visitor-counter" class="text-cyber-yellow font-bold text-sm">18,492</span>
+                </div>
+                <div class="border-l border-gray-800 pl-6">
+                    <span class="text-gray-500 uppercase block text-[10px]">Server Status</span>
+                    <span class="text-green-400 font-bold text-sm flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-ping"></span> ONLINE</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODALS CONTAINER -->
+
+    <!-- Edit Owner Details Modal -->
+    <div id="owner-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border-2 border-cyber-red box-glow-red relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeOwnerModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center space-y-1 border-b border-gray-800 pb-3">
+                <div class="w-12 h-12 bg-cyber-red/20 border border-cyber-red rounded-full flex items-center justify-center mx-auto text-cyber-red text-xl mb-1">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <h3 class="font-orbitron font-bold text-xl text-white uppercase">Edit Owner Info</h3>
+                <p class="text-xs font-mono text-gray-400">Update Organization Owner Details</p>
+            </div>
+
+            <form onsubmit="saveOwnerDetails(event)" class="space-y-3 font-rajdhani">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Owner Name / IGN</label>
+                    <input type="text" id="edit-owner-name" required placeholder="e.g. PRIYANSHU" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-red font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Designation / Title</label>
+                    <input type="text" id="edit-owner-title" required placeholder="e.g. FOUNDER & CEO" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-red font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">In-Game Role</label>
+                    <input type="text" id="edit-owner-role" required placeholder="e.g. IGL / Strategy" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-red font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Free Fire UID</label>
+                    <input type="text" id="edit-owner-uid" required placeholder="e.g. 1818181818" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm font-mono outline-none focus:border-cyber-red">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Status Badge</label>
+                    <input type="text" id="edit-owner-status" required placeholder="e.g. ACTIVE OWNER" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-red font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Owner Bio / Statement</label>
+                    <textarea id="edit-owner-bio" rows="3" required placeholder="Enter quote or leadership statement..." class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-red"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Avatar Image URL</label>
+                    <input type="url" id="edit-owner-avatar" required placeholder="https://..." class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-red text-xs">
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-red hover:bg-red-700 text-white font-orbitron font-bold p-3 text-sm uppercase box-glow-red mt-2">
+                    Save Owner Info
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border-2 border-cyber-red box-glow-red relative space-y-4">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-cyber-red/20 border border-cyber-red rounded-full flex items-center justify-center mx-auto text-cyber-red text-xl mb-2">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="font-orbitron font-bold text-xl text-white uppercase">Admin Portal Login</h3>
+                <p class="text-xs font-mono text-gray-400">Restricted access for Owner PRIYANSHU</p>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4 pt-2">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Admin Password</label>
+                    <input type="password" id="admin-pass-input" placeholder="Enter password" required class="w-full bg-black/70 border border-gray-700 focus:border-cyber-red text-white p-3 rounded text-sm font-mono outline-none">
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-red hover:bg-red-700 text-white font-orbitron font-bold p-3 text-sm uppercase box-glow-red">
+                    Authenticate Admin
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Data Confirmation Modal -->
+    <div id="reset-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border-2 border-cyber-red box-glow-red relative space-y-4">
+            <button onclick="closeResetModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 bg-red-950/80 border-2 border-cyber-red rounded-full flex items-center justify-center mx-auto text-cyber-red text-2xl box-glow-red">
+                    <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                </div>
+                <h3 class="font-orbitron font-bold text-xl text-white uppercase">RESET ALL SITE DATA</h3>
+                <p class="text-xs font-mono text-gray-300">Are you sure you want to clear all fake/default entries across the organization portal?</p>
+            </div>
+
+            <div class="bg-black/60 p-3 rounded border border-cyber-red/30 text-xs font-mono text-gray-400 space-y-1">
+                <p class="text-cyber-red font-bold">⚠️ The following will be wiped clean:</p>
+                <ul class="list-disc list-inside space-y-0.5 text-gray-300">
+                    <li>All Roster Players</li>
+                    <li>All Tournament Point Tables</li>
+                    <li>All Announcements & News</li>
+                    <li>All Gallery Media & Highlights</li>
+                    <li>Match History & Counter Stats</li>
+                </ul>
+            </div>
+
+            <div class="flex items-center space-x-3 pt-2">
+                <button onclick="confirmResetAllData()" class="flex-1 cyber-btn bg-cyber-red hover:bg-red-700 text-white font-orbitron font-bold p-3 text-xs uppercase box-glow-red">
+                    Yes, Wipe Everything
+                </button>
+                <button onclick="closeResetModal()" class="flex-1 cyber-btn bg-gray-800 hover:bg-gray-700 text-gray-300 font-orbitron font-bold p-3 text-xs uppercase border border-gray-600">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Player Modal -->
+    <div id="player-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-cyber-blue box-glow-blue relative space-y-4">
+            <button onclick="closePlayerModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 id="player-modal-title" class="font-orbitron font-bold text-lg text-white uppercase border-b border-gray-800 pb-2">Add Player to Roster</h3>
+            <form onsubmit="savePlayer(event)" class="space-y-3 font-rajdhani">
+                <input type="hidden" id="player-edit-id">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Player IGN Name</label>
+                    <input type="text" id="player-name" required placeholder="e.g. DEATH18 X" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Free Fire UID</label>
+                    <input type="text" id="player-uid" required placeholder="e.g. 123456789" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm font-mono outline-none focus:border-cyber-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">In-Game Role</label>
+                    <select id="player-role" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-blue">
+                        <option value="Rusher">Rusher</option>
+                        <option value="Sniper">Sniper</option>
+                        <option value="IGL">IGL (Captain)</option>
+                        <option value="Support">Support</option>
+                        <option value="Flanker">Flanker</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Avatar Image URL (Optional)</label>
+                    <input type="url" id="player-avatar" placeholder="https://..." class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none focus:border-cyber-blue">
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-blue text-black font-orbitron font-bold p-3 text-sm uppercase box-glow-blue mt-2">
+                    Save Roster Entry
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Point Table Modal -->
+    <div id="table-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-cyber-yellow box-glow-yellow relative space-y-4">
+            <button onclick="closeTableModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-orbitron font-bold text-lg text-white uppercase border-b border-gray-800 pb-2">Upload Point Table Record</h3>
+            <form onsubmit="savePointTable(event)" class="space-y-3 font-rajdhani">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Tournament Title</label>
+                    <input type="text" id="table-title" required placeholder="e.g. FF Scrim #21" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Position</label>
+                        <input type="text" id="table-pos" required placeholder="e.g. 1st" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Total Points</label>
+                        <input type="number" id="table-points" required placeholder="68" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Direct File Link (Image, Sheet or Document Link)</label>
+                    <input type="url" id="table-file-url" placeholder="https://..." class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-yellow text-black font-orbitron font-bold p-3 text-sm uppercase box-glow-yellow mt-2">
+                    Publish Standings
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Post News Modal -->
+    <div id="news-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-cyber-red box-glow-red relative space-y-4">
+            <button onclick="closeNewsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-orbitron font-bold text-lg text-white uppercase border-b border-gray-800 pb-2">Post News Update</h3>
+            <form onsubmit="saveNews(event)" class="space-y-3 font-rajdhani">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Headline</label>
+                    <input type="text" id="news-title" required placeholder="🔥 Qualified for Grand Finals" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Content / Details</label>
+                    <textarea id="news-body" rows="3" required placeholder="DEATHCREW 18 secured 1st position with 3 Booyahs..." class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none"></textarea>
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-red text-white font-orbitron font-bold p-3 text-sm uppercase box-glow-red mt-2">
+                    Publish Announcement
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Media / Highlight Modal -->
+    <div id="media-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border border-cyber-blue box-glow-blue relative space-y-4">
+            <button onclick="closeMediaModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-orbitron font-bold text-lg text-white uppercase border-b border-gray-800 pb-2">Add Gallery Item / Highlight</h3>
+            <form onsubmit="saveMedia(event)" class="space-y-3 font-rajdhani">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Title</label>
+                    <input type="text" id="media-title" required placeholder="e.g. Grand Finals Booyah Clutch" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Type</label>
+                    <select id="media-type" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                        <option value="image">Screenshot / Wallpaper Image</option>
+                        <option value="video">YouTube Video Highlight</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Image Link or YouTube Embed Link</label>
+                    <input type="url" id="media-url" required placeholder="https://..." class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-blue text-black font-orbitron font-bold p-3 text-sm uppercase box-glow-blue mt-2">
+                    Add to Gallery
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Join The Crew Modal -->
+    <div id="recruit-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-6 border-2 border-cyber-red box-glow-red relative space-y-4">
+            <button onclick="closeRecruitModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center">
+                <i class="fa-solid fa-crosshairs text-3xl text-cyber-red mb-1"></i>
+                <h3 class="font-orbitron font-bold text-xl text-white uppercase">JOIN DEATHCREW 18</h3>
+                <p class="text-xs font-mono text-cyber-blue">Submit tryout via Direct WhatsApp Link</p>
+            </div>
+            <form onsubmit="handleRecruitSubmit(event)" class="space-y-3 font-rajdhani">
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Your IGN & UID</label>
+                    <input type="text" id="recruit-ign" required placeholder="e.g. DC18_Rider (UID: 987654321)" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Role Applied For</label>
+                    <select id="recruit-role" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                        <option value="Rusher">Rusher</option>
+                        <option value="Sniper">Sniper</option>
+                        <option value="Support">Support</option>
+                        <option value="IGL">IGL / Captain</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-1">Contact Number / Discord ID</label>
+                    <input type="text" id="recruit-contact" required placeholder="Mobile number or Discord tag" class="w-full bg-black/70 border border-gray-700 text-white p-2.5 rounded text-sm outline-none">
+                </div>
+                <button type="submit" class="w-full cyber-btn bg-cyber-red hover:bg-red-700 text-white font-orbitron font-bold p-3 text-sm uppercase box-glow-red flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Send Application via WhatsApp Link</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-cyber-dark text-white px-5 py-3 rounded-xl border border-cyber-blue box-glow-blue transition-all duration-500 translate-y-20 opacity-0 flex items-center space-x-3 pointer-events-none font-mono text-xs">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-cyber-blue text-lg"></i>
+        <span id="toast-msg">Action completed successfully!</span>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. INITIAL STATE & MOCK DATA
+           ========================================================================== */
+        let soundEnabled = true;
+        let isAdminLoggedIn = false;
+
+        // Organization Owner Data Object
+        let ownerData = {
+            name: "PRIYANSHU",
+            title: "FOUNDER & CEO",
+            role: "IGL / Strategy",
+            uid: "1818181818",
+            status: "ACTIVE OWNER",
+            bio: `"DEATHCREW 18 was built on ruthless discipline, top-tier aiming, and tactical synergy. Our objective is simple: conquer every Free Fire tournament, dominate points tables, and construct an unbreakable legacy in the esports ecosystem."`,
+            avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=600&q=80"
+        };
+
+        // Default Players Dataset
+        let players = [
+            { id: 1, name: "DEATH18 X", uid: "123456789", role: "Rusher", avatar: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80", kills: 142 },
+            { id: 2, name: "DEATH18 Y", uid: "987654321", role: "Sniper", avatar: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80", kills: 118 },
+            { id: 3, name: "DEATH18 ALPHA", uid: "456789123", role: "IGL", avatar: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=300&q=80", kills: 95 },
+            { id: 4, name: "DEATH18 VIPER", uid: "789123456", role: "Support", avatar: "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=300&q=80", kills: 84 }
+        ];
+
+        // Point Tables Dataset with direct links
+        let pointTables = [
+            { id: 1, tournament: "FF Scrim #21", position: "1st", points: 68, uploaded: "3 Aug 2026 • 8:30 PM", fileUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80" },
+            { id: 2, tournament: "Battle Arena Qualifiers", position: "2nd", points: 54, uploaded: "2 Aug 2026 • 9:15 PM", fileUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" },
+            { id: 3, tournament: "National Pro League Round 1", position: "1st", points: 72, uploaded: "30 Jul 2026 • 10:00 PM", fileUrl: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80" }
+        ];
+
+        // News Items
+        let newsItems = [
+            { id: 1, title: "🔥 Qualified for Grand Finals", body: "DEATHCREW 18 completely dominated the Semi-Finals with 3 consecutive Booyahs, securing our spot in the Grand Finals!", uploaded: "3 August 2026 • 8:42 PM" },
+            { id: 2, title: "⚡ Welcome DEATH18 VIPER", body: "We are thrilled to officially announce VIPER as our new primary Support player for the upcoming Free Fire League.", uploaded: "1 August 2026 • 4:15 PM" }
+        ];
+
+        // Gallery & Highlights
+        let mediaItems = [
+            { id: 1, title: "Squad Victory Banner", type: "image", url: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=600&q=80" },
+            { id: 2, title: "Grand Finals Highlights", type: "video", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
+            { id: 3, title: "Owner & Squad Setup", type: "image", url: "https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        // Match History Dataset
+        let matchHistory = [
+            { date: "03 Aug 2026", match: "Bermuda Scrim #21", pos: "1st (Booyah!)", kills: 18, status: "Victory" },
+            { date: "02 Aug 2026", match: "Purgatory Battle", pos: "2nd Place", kills: 12, status: "Runner Up" },
+            { date: "01 Aug 2026", match: "Kalahari Showdown", pos: "1st (Booyah!)", kills: 21, status: "Victory" },
+            { date: "30 Jul 2026", match: "Alpine Championship", pos: "3rd Place", kills: 14, status: "Qualified" }
+        ];
+
+        /* ==========================================================================
+           2. PROCEDURAL SOUND SYNTHESIZER (WEB AUDIO API)
+           ========================================================================== */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playAudio(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'victory') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(554.37, now + 0.1);
+                    osc.frequency.setValueAtTime(659.25, now + 0.2);
+                    osc.frequency.setValueAtTime(880, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                showToast("Sound effects enabled");
+                playAudio('click');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                showToast("Sound effects muted");
+            }
+        }
+
+        /* ==========================================================================
+           3. THREE.JS 3D PARTICLE BACKGROUND ENGINE
+           ========================================================================== */
+        function init3DBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesCount = 350;
+            const positions = new Float32Array(particlesCount * 3);
+            const colors = new Float32Array(particlesCount * 3);
+
+            const colorRed = new THREE.Color('#ff003c');
+            const colorBlue = new THREE.Color('#00f0ff');
+
+            for (let i = 0; i < particlesCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 20;
+                positions[i + 1] = (Math.random() - 0.5) * 20;
+                positions[i + 2] = (Math.random() - 0.5) * 20;
+
+                const mixedColor = Math.random() > 0.5 ? colorRed : colorBlue;
+                colors[i] = mixedColor.r;
+                colors[i + 1] = mixedColor.g;
+                colors[i + 2] = mixedColor.b;
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.08,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            camera.position.z = 8;
+
+            let mouseX = 0, mouseY = 0;
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                points.rotation.y += 0.0015;
+                points.rotation.x += 0.001;
+                camera.position.x += (mouseX - camera.position.x) * 0.05;
+                camera.position.y += (-mouseY - camera.position.y) * 0.05;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        /* ==========================================================================
+           4. RENDER FUNCTIONS
+           ========================================================================== */
+
+        // Render Owner Info Across Website
+        function renderOwner() {
+            document.getElementById('nav-owner-name').innerText = ownerData.name;
+            document.getElementById('hero-owner-name').innerText = ownerData.name;
+            document.getElementById('footer-owner-name').innerText = ownerData.name;
+
+            document.getElementById('owner-name-display').innerText = ownerData.name;
+            document.getElementById('owner-title-badge').innerText = ownerData.title;
+            document.getElementById('owner-role-display').innerText = ownerData.role;
+            document.getElementById('owner-uid-display').innerText = ownerData.uid;
+            document.getElementById('owner-status-display').innerText = ownerData.status;
+            document.getElementById('owner-bio-display').innerText = ownerData.bio;
+            document.getElementById('owner-avatar-img').src = ownerData.avatar;
+
+            // Update WhatsApp and Copy links dynamically
+            const waMsg = encodeURIComponent(`Hello ${ownerData.name}! Connecting from DEATHCREW 18 Esports Website.`);
+            const waUrl = `https://api.whatsapp.com/send?text=${waMsg}`;
+            document.getElementById('hero-wa-link').href = waUrl;
+            document.getElementById('owner-wa-btn').href = waUrl;
+            document.getElementById('owner-copy-btn').setAttribute('onclick', `copyUID('${ownerData.uid}')`);
+        }
+
+        // Render Roster Players
+        function renderPlayers(filterText = '') {
+            const grid = document.getElementById('players-grid');
+            grid.innerHTML = '';
+
+            const filtered = players.filter(p => 
+                p.name.toLowerCase().includes(filterText.toLowerCase()) || 
+                p.uid.includes(filterText) || 
+                p.role.toLowerCase().includes(filterText.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-gray-500 font-mono">No players match the search query.</div>`;
+                return;
+            }
+
+            filtered.forEach(player => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-5 rounded-2xl border border-gray-800 hover:border-cyber-blue transition duration-300 relative group overflow-hidden flex flex-col justify-between space-y-4";
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <img src="${player.avatar}" alt="${player.name}" class="w-14 h-14 rounded-xl object-cover border border-cyber-blue/50">
+                        <div>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded ${getRoleBadgeClass(player.role)} uppercase">${player.role}</span>
+                            <h4 class="font-orbitron font-extrabold text-lg text-white group-hover:text-cyber-blue transition">${player.name}</h4>
+                            <p class="text-xs font-mono text-gray-400">UID: ${player.uid}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs font-mono pt-3 border-t border-gray-800">
+                        <span class="text-gray-400">Total Kills: <strong class="text-cyber-yellow">${player.kills}</strong></span>
+                        <button onclick="copyUID('${player.uid}')" class="cyber-btn text-cyber-blue hover:text-white flex items-center space-x-1">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Copy UID Link</span>
+                        </button>
+                    </div>
+
+                    ${isAdminLoggedIn ? `
+                    <div class="flex items-center space-x-2 pt-2 border-t border-gray-800/60">
+                        <button onclick="openEditPlayer(${player.id})" class="flex-1 bg-cyber-blue/10 border border-cyber-blue/40 text-cyber-blue hover:bg-cyber-blue/20 text-xs py-1 rounded font-mono">Edit</button>
+                        <button onclick="deletePlayer(${player.id})" class="flex-1 bg-cyber-red/10 border border-cyber-red/40 text-cyber-red hover:bg-cyber-red/20 text-xs py-1 rounded font-mono">Delete</button>
+                    </div>
+                    ` : ''}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getRoleBadgeClass(role) {
+            switch(role) {
+                case 'Rusher': return 'bg-red-950/80 text-cyber-red border border-cyber-red/40';
+                case 'Sniper': return 'bg-cyan-950/80 text-cyber-blue border border-cyber-blue/40';
+                case 'IGL': return 'bg-yellow-950/80 text-cyber-yellow border border-cyber-yellow/40';
+                default: return 'bg-gray-800 text-gray-300';
+            }
+        }
+
+        // Render Point Tables with Direct Links
+        function renderPointTables() {
+            const body = document.getElementById('point-tables-body');
+            body.innerHTML = '';
+
+            pointTables.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-black/30 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-orbitron font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-trophy text-cyber-yellow text-xs"></i>
+                        <span>${t.tournament}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2.5 py-1 rounded text-xs font-mono font-bold ${t.position === '1st' ? 'bg-cyber-yellow/20 text-cyber-yellow border border-cyber-yellow' : 'bg-gray-800 text-gray-300'}">
+                            ${t.position}
+                        </span>
+                    </td>
+                    <td class="p-3 font-mono font-bold text-cyber-blue">${t.points} PTS</td>
+                    <td class="p-3 font-mono text-xs text-gray-400">${t.uploaded}</td>
+                    <td class="p-3 text-right space-x-2 font-mono text-xs">
+                        <a href="${t.fileUrl}" target="_blank" rel="noopener noreferrer" onclick="playAudio('click')" class="inline-flex items-center bg-cyber-blue/10 text-cyber-blue hover:bg-cyber-blue/20 px-3 py-1 rounded border border-cyber-blue/30 transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Direct Open
+                        </a>
+                        ${isAdminLoggedIn ? `
+                        <button onclick="deleteTable(${t.id})" class="bg-cyber-red/10 text-cyber-red hover:bg-cyber-red/20 px-2.5 py-1 rounded border border-cyber-red/30">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        ` : ''}
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Render News
+        function renderNews() {
+            const grid = document.getElementById('news-grid');
+            grid.innerHTML = '';
+
+            newsItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-6 rounded-2xl border border-gray-800 space-y-3 relative";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs font-mono text-gray-400">
+                        <span class="text-cyber-red font-bold flex items-center"><i class="fa-solid fa-bullhorn mr-1.5"></i> OFFICIAL ANNOUNCEMENT</span>
+                        <span><i class="fa-regular fa-clock mr-1"></i> ${item.uploaded}</span>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl text-white">${item.title}</h3>
+                    <p class="text-gray-300 font-rajdhani text-base leading-relaxed">${item.body}</p>
+                    ${isAdminLoggedIn ? `
+                    <div class="pt-2 text-right">
+                        <button onclick="deleteNews(${item.id})" class="text-xs font-mono text-cyber-red hover:underline"><i class="fa-solid fa-trash mr-1"></i> Delete Announcement</button>
+                    </div>
+                    ` : ''}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Render Media
+        function renderMedia() {
+            const grid = document.getElementById('media-grid');
+            grid.innerHTML = '';
+
+            mediaItems.forEach(m => {
+                const card = document.createElement('div');
+                card.className = "glass-panel rounded-2xl overflow-hidden border border-gray-800 hover:border-cyber-blue transition space-y-2 group";
+                if (m.type === 'image') {
+                    card.innerHTML = `
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="${m.url}" alt="${m.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-3 flex items-center justify-between">
+                            <span class="font-orbitron font-bold text-sm text-white">${m.title}</span>
+                            <span class="text-[10px] font-mono bg-cyber-blue/20 text-cyber-blue px-2 py-0.5 rounded">IMAGE</span>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="h-48 relative">
+                            <iframe class="w-full h-full" src="${m.url}" title="${m.title}" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-3 flex items-center justify-between">
+                            <span class="font-orbitron font-bold text-sm text-white">${m.title}</span>
+                            <span class="text-[10px] font-mono bg-cyber-red/20 text-cyber-red px-2 py-0.5 rounded">HIGHLIGHT</span>
+                        </div>
+                    `;
+                }
+                grid.appendChild(card);
+            });
+        }
+
+        // Render Match History
+        function renderMatchHistory() {
+            const body = document.getElementById('match-history-body');
+            body.innerHTML = '';
+
+            matchHistory.forEach(h => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-black/30 transition font-mono";
+                tr.innerHTML = `
+                    <td class="p-2 text-gray-400 text-xs">${h.date}</td>
+                    <td class="p-2 font-bold text-white">${h.match}</td>
+                    <td class="p-2 text-cyber-yellow">${h.pos}</td>
+                    <td class="p-2 text-cyber-blue">${h.kills} Kills</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] ${h.status === 'Victory' ? 'bg-green-900/60 text-green-400 border border-green-500' : 'bg-gray-800 text-gray-300'}">${h.status}</span></td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        /* ==========================================================================
+           5. CHART.JS INITIALIZATION
+           ========================================================================== */
+        let killsChart, progressChart;
+
+        function initCharts() {
+            const ctx1 = document.getElementById('chart-kills').getContext('2d');
+            killsChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: players.map(p => p.name),
+                    datasets: [{
+                        data: players.map(p => p.kills),
+                        backgroundColor: ['#ff003c', '#00f0ff', '#fcee0a', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { family: 'Orbitron' } } }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('chart-progress').getContext('2d');
+            progressChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Scrim #17', 'Scrim #18', 'Scrim #19', 'Scrim #20', 'Scrim #21'],
+                    datasets: [{
+                        label: 'Points Scored',
+                        data: [42, 58, 61, 52, 68],
+                        borderColor: '#00f0ff',
+                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { family: 'Orbitron' } } }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (!killsChart) return;
+            killsChart.data.labels = players.map(p => p.name);
+            killsChart.data.datasets[0].data = players.map(p => p.kills);
+            killsChart.update();
+        }
+
+        /* ==========================================================================
+           6. INTERACTIVE UTILITIES & LINK HANDLERS
+           ========================================================================== */
+
+        // Live Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+        }, 1000);
+
+        // Dynamic Typewriter
+        let typingPhrases = [
+            "DOMINATING THE FREE FIRE ARENA",
+            "TACTICAL PRECISION & UNMATCHED FIREPOWER",
+            "JOIN THE CREW & RULE THE LEADERBOARD"
+        ];
+        let phraseIdx = 0;
+        let charIdx = 0;
+        let isDeleting = false;
+
+        function typeWriter() {
+            const current = typingPhrases[phraseIdx];
+            const target = document.getElementById('typewriter-text');
+            if (!target) return;
+
+            if (isDeleting) {
+                target.innerText = current.substring(0, charIdx - 1);
+                charIdx--;
+            } else {
+                target.innerText = current.substring(0, charIdx + 1);
+                charIdx++;
+            }
+
+            let speed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIdx === current.length) {
+                speed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIdx === 0) {
+                isDeleting = false;
+                phraseIdx = (phraseIdx + 1) % typingPhrases.length;
+                speed = 500;
+            }
+
+            setTimeout(typeWriter, speed);
+        }
+
+        // Share Direct Website Link Function
+        function shareDirectLink() {
+            playAudio('click');
+            const url = window.location.href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast("Direct Website Link copied to clipboard!");
+                }).catch(() => {
+                    fallbackCopy(url);
+                });
+            } else {
+                fallbackCopy(url);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Direct Link copied to clipboard!");
+        }
+
+        // Copy UID
+        function copyUID(uid) {
+            playAudio('click');
+            fallbackCopy(uid);
+            showToast(`Copied Free Fire UID: ${uid}`);
+        }
+
+        // Toast Notification
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Animated Counters
+        function animateCounters() {
+            animateValue("counter-booyah", 0, 48, 1500);
+            animateValue("counter-kills", 0, 439, 1500);
+            animateValue("counter-winrate", 0, 78, 1500, "%");
+        }
+
+        function animateValue(id, start, end, duration, suffix = "") {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerText = Math.floor(progress * (end - start) + start) + suffix;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Owner Modal Actions
+        function openOwnerModal() {
+            playAudio('click');
+            document.getElementById('edit-owner-name').value = ownerData.name;
+            document.getElementById('edit-owner-title').value = ownerData.title;
+            document.getElementById('edit-owner-role').value = ownerData.role;
+            document.getElementById('edit-owner-uid').value = ownerData.uid;
+            document.getElementById('edit-owner-status').value = ownerData.status;
+            document.getElementById('edit-owner-bio').value = ownerData.bio;
+            document.getElementById('edit-owner-avatar').value = ownerData.avatar;
+            document.getElementById('owner-modal').classList.remove('hidden');
+        }
+
+        function closeOwnerModal() {
+            document.getElementById('owner-modal').classList.add('hidden');
+        }
+
+        function saveOwnerDetails(e) {
+            e.preventDefault();
+            playAudio('victory');
+
+            ownerData.name = document.getElementById('edit-owner-name').value;
+            ownerData.title = document.getElementById('edit-owner-title').value;
+            ownerData.role = document.getElementById('edit-owner-role').value;
+            ownerData.uid = document.getElementById('edit-owner-uid').value;
+            ownerData.status = document.getElementById('edit-owner-status').value;
+            ownerData.bio = document.getElementById('edit-owner-bio').value;
+            ownerData.avatar = document.getElementById('edit-owner-avatar').value;
+
+            renderOwner();
+            closeOwnerModal();
+            confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+            showToast("Owner details updated successfully!");
+        }
+
+        // Admin Portal Login
+        function openAdminModal() { playAudio('click'); document.getElementById('admin-modal').classList.remove('hidden'); }
+        function closeAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('admin-pass-input').value;
+            if (pass === 'luffykillblackbeardsoon') {
+                isAdminLoggedIn = true;
+                playAudio('victory');
+                closeAdminModal();
+                showToast("Admin Authenticated! Controls unlocked.");
+                document.getElementById('admin-btn-text').innerText = "Admin Active";
+                document.getElementById('admin-icon').className = "fa-solid fa-user-check text-cyber-yellow";
+                document.getElementById('admin-control-bar').classList.remove('hidden');
+                
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                renderPlayers();
+                renderPointTables();
+                renderNews();
+                renderMedia();
+            } else {
+                showToast("Invalid Admin Password!");
+            }
+        }
+
+        function logoutAdmin() {
+            playAudio('click');
+            isAdminLoggedIn = false;
+            document.getElementById('admin-btn-text').innerText = "Admin";
+            document.getElementById('admin-icon').className = "fa-solid fa-lock";
+            document.getElementById('admin-control-bar').classList.add('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            renderPlayers();
+            renderPointTables();
+            renderNews();
+            renderMedia();
+            showToast("Admin logged out.");
+        }
+
+        function openResetModal() { playAudio('click'); document.getElementById('reset-modal').classList.remove('hidden'); }
+        function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
+
+        function confirmResetAllData() {
+            playAudio('victory');
+            players = [];
+            pointTables = [];
+            newsItems = [];
+            mediaItems = [];
+            matchHistory = [];
+
+            // Reset hero counters
+            document.getElementById('counter-booyah').innerText = '0';
+            document.getElementById('counter-kills').innerText = '0';
+            document.getElementById('counter-winrate').innerText = '0%';
+
+            closeResetModal();
+            renderPlayers();
+            renderPointTables();
+            renderNews();
+            renderMedia();
+            renderMatchHistory();
+            updateCharts();
+
+            confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+            showToast("All fake values reset to zero/empty!");
+        }
+
+        // Search Filter
+        function filterPlayers() {
+            const query = document.getElementById('player-search').value;
+            renderPlayers(query);
+        }
+
+        // Player Actions
+        function openAddPlayerModal() {
+            playAudio('click');
+            document.getElementById('player-edit-id').value = '';
+            document.getElementById('player-name').value = '';
+            document.getElementById('player-uid').value = '';
+            document.getElementById('player-modal-title').innerText = "Add Player to Roster";
+            document.getElementById('player-modal').classList.remove('hidden');
+        }
+        function closePlayerModal() { document.getElementById('player-modal').classList.add('hidden'); }
+
+        function openEditPlayer(id) {
+            const p = players.find(item => item.id === id);
+            if (!p) return;
+            document.getElementById('player-edit-id').value = p.id;
+            document.getElementById('player-name').value = p.name;
+            document.getElementById('player-uid').value = p.uid;
+            document.getElementById('player-role').value = p.role;
+            document.getElementById('player-avatar').value = p.avatar;
+            document.getElementById('player-modal-title').innerText = "Edit Player Entry";
+            document.getElementById('player-modal').classList.remove('hidden');
+        }
+
+        function savePlayer(e) {
+            e.preventDefault();
+            playAudio('click');
+            const editId = document.getElementById('player-edit-id').value;
+            const name = document.getElementById('player-name').value;
+            const uid = document.getElementById('player-uid').value;
+            const role = document.getElementById('player-role').value;
+            const avatar = document.getElementById('player-avatar').value || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300&q=80";
+
+            if (editId) {
+                const idx = players.findIndex(p => p.id == editId);
+                if (idx !== -1) {
+                    players[idx].name = name;
+                    players[idx].uid = uid;
+                    players[idx].role = role;
+                    players[idx].avatar = avatar;
+                }
+                showToast("Player details updated!");
+            } else {
+                players.push({
+                    id: Date.now(),
+                    name, uid, role, avatar, kills: 0
+                });
+                showToast("New player added to Roster!");
+            }
+
+            closePlayerModal();
+            renderPlayers();
+            updateCharts();
+        }
+
+        function deletePlayer(id) {
+            playAudio('click');
+            players = players.filter(p => p.id !== id);
+            renderPlayers();
+            updateCharts();
+            showToast("Player removed from roster.");
+        }
+
+        // Point Table Actions
+        function openAddTableModal() { playAudio('click'); document.getElementById('table-modal').classList.remove('hidden'); }
+        function closeTableModal() { document.getElementById('table-modal').classList.add('hidden'); }
+
+        function savePointTable(e) {
+            e.preventDefault();
+            playAudio('click');
+            const title = document.getElementById('table-title').value;
+            const pos = document.getElementById('table-pos').value;
+            const pts = document.getElementById('table-points').value;
+            const linkUrl = document.getElementById('table-file-url').value || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80';
+            const now = new Date();
+            const dateStr = `${now.getDate()} ${now.toLocaleString('default', { month: 'short' })} ${now.getFullYear()} • ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+            pointTables.unshift({
+                id: Date.now(),
+                tournament: title,
+                position: pos,
+                points: parseInt(pts),
+                uploaded: dateStr,
+                fileUrl: linkUrl
+            });
+
+            closeTableModal();
+            renderPointTables();
+            showToast("Point table published with direct open link!");
+
+            if (pos.includes('1') || pos.toLowerCase().includes('win')) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                playAudio('victory');
+            }
+        }
+
+        function deleteTable(id) {
+            playAudio('click');
+            pointTables = pointTables.filter(t => t.id !== id);
+            renderPointTables();
+            showToast("Point table deleted.");
+        }
+
+        // Recruitment Modal Direct WhatsApp Action
+        function openRecruitModal() { playAudio('click'); document.getElementById('recruit-modal').classList.remove('hidden'); }
+        function closeRecruitModal() { document.getElementById('recruit-modal').classList.add('hidden'); }
+        
+        function handleRecruitSubmit(e) {
+            e.preventDefault();
+            playAudio('victory');
+            
+            const ign = document.getElementById('recruit-ign').value;
+            const role = document.getElementById('recruit-role').value;
+            const contact = document.getElementById('recruit-contact').value;
+
+            const textMsg = encodeURIComponent(`🔥 *DEATHCREW 18 TRYOUT APPLICATION*\n\n👤 *Player Info:* ${ign}\n🎯 *Role:* ${role}\n📱 *Contact:* ${contact}\n\nSubmitted via DEATHCREW 18 Official Portal.`);
+            const waUrl = `https://api.whatsapp.com/send?text=${textMsg}`;
+
+            closeRecruitModal();
+            confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+            showToast("Opening WhatsApp application link...");
+            
+            window.open(waUrl, '_blank');
+        }
+
+        // News Actions
+        function openAddNewsModal() { playAudio('click'); document.getElementById('news-modal').classList.remove('hidden'); }
+        function closeNewsModal() { document.getElementById('news-modal').classList.add('hidden'); }
+
+        function saveNews(e) {
+            e.preventDefault();
+            playAudio('click');
+            const title = document.getElementById('news-title').value;
+            const body = document.getElementById('news-body').value;
+            const now = new Date();
+            const dateStr = `${now.getDate()} ${now.toLocaleString('default', { month: 'short' })} ${now.getFullYear()} • ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+            newsItems.unshift({
+                id: Date.now(),
+                title, body, uploaded: dateStr
+            });
+
+            closeNewsModal();
+            renderNews();
+            showToast("Announcement published!");
+        }
+
+        function deleteNews(id) {
+            playAudio('click');
+            newsItems = newsItems.filter(n => n.id !== id);
+            renderNews();
+            showToast("Announcement deleted.");
+        }
+
+        // Media Actions
+        function openAddMediaModal() { playAudio('click'); document.getElementById('media-modal').classList.remove('hidden'); }
+        function closeMediaModal() { document.getElementById('media-modal').classList.add('hidden'); }
+
+        function saveMedia(e) {
+            e.preventDefault();
+            playAudio('click');
+            const title = document.getElementById('media-title').value;
+            const type = document.getElementById('media-type').value;
+            const url = document.getElementById('media-url').value;
+
+            mediaItems.unshift({ id: Date.now(), title, type, url });
+            closeMediaModal();
+            renderMedia();
+            showToast("Media added to gallery!");
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        /* ==========================================================================
+           7. INITIALIZATION ON WINDOW LOAD
+           ========================================================================== */
+        window.onload = function () {
+            let prog = 0;
+            const bar = document.getElementById('progress-bar');
+            const interval = setInterval(() => {
+                prog += 25;
+                if (bar) bar.style.width = prog + '%';
+                if (prog >= 100) {
+                    clearInterval(interval);
+                    const loader = document.getElementById('loader');
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 700);
+                }
+            }, 100);
+
+            init3DBackground();
+            renderOwner();
+            renderPlayers();
+            renderPointTables();
+            renderNews();
+            renderMedia();
+            renderMatchHistory();
+
+            initCharts();
+            animateCounters();
+            typeWriter();
+        };
+    </script>
+</body>
+</html>
